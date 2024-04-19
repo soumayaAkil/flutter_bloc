@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'app_router.dart';
-import 'app/config/themes/dark_theme.dart';
-import 'app/config/themes/light_theme.dart';
-import 'presentation/pages/home.dart';
+import 'core/config/themes/dark_theme.dart';
+import 'core/config/themes/light_theme.dart';
+import 'src/features/home/home.dart';
 import 'router.dart';
 
 void main() {
@@ -22,8 +21,8 @@ class ProlabApp extends StatelessWidget {
         // MaterialApp.router(
         MaterialApp(
       title: 'Flutter Demo',
-      theme: light_Theme,
-      darkTheme: dark_Theme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       // routerConfig: appRouter.config(),

@@ -1,46 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'presentation/pages/home.dart';
-import 'presentation/pages/home_page.dart';
-import 'app/constants/strings/strings.dart';
-import 'business_logic/dossier_bloc/dossieranalyse_bloc.dart';
-import 'business_logic/landing_bloc/landing_bloc.dart';
+import 'package:prolab_mobile/src/features/dossier_analyse/dossier_bloc/dossieranalyse_bloc.dart';
+import 'package:prolab_mobile/src/features/dossier_detail/dossier_detail.dart';
+import 'package:prolab_mobile/src/features/dossier_detail/flitre_bloc/filtre_bloc.dart';
+import 'package:prolab_mobile/src/features/home/home_bloc/home_bloc.dart';
+import 'core/constants/strings/strings.dart';
 import 'data/repository/dossier_repository.dart';
 import 'data/web_services/dossier_web_services.dart';
-import 'presentation/pages/landing_page.dart';
+import 'src/features/home/home_page.dart';
 
 class AppRouter {
   late DossierAnalyseRepository dossiersRepository;
   //late CubitCubit charactersCubit;
 
-  final currentDate = "${DateTime.now().year-4}/${DateTime.now().month}/${DateTime.now().day}";
-  final currentDateF = "${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}";
+  final currentDate =
+      "${DateTime.now().year - 4}/${DateTime.now().month}/${DateTime.now().day}";
+  final currentDateF =
+      "${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}";
   AppRouter() {
     dossiersRepository = DossierAnalyseRepository(DossierWebService());
     //charactersCubit = CubitCubit(dossiersRepository);
   }
 
   Route? generateRoute(RouteSettings settings) {
-    
     switch (settings.name) {
       case dossierScreeens:
         return MaterialPageRoute(
           builder: (context) {
-            return    MultiBlocProvider(
-    providers: [
-      BlocProvider(
-        create: (context) =>
-            DossieranalyseBloc(dossiersRepository) ),
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => HomeBloc(),
+                ),
+                BlocProvider(
+                create: (context) => FiltreBloc(),
+                ),
 
-      BlocProvider(create: (context) => LandingBloc(),),
-    
-    ],
-    child: MaterialApp(
-      home: HomePage(),
-    ),
-    );
+                BlocProvider(
+                    create: (context) =>
+                        DossieranalyseBloc(dossiersRepository)),
+              ],
+              child: const HomePage(),
+             // child: const DossierDetail(),
+            );
           },
         );
+
 /*
         BlocProvider<LandingBloc>(
               create: (BuildContext context) => LandingBloc(),

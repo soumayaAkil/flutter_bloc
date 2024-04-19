@@ -1,10 +1,31 @@
 import 'dart:core';
-import 'dart:ffi';
-
 import 'patient_model.dart';
-
 import 'medecin_model.dart';
+class DossierDto {
+  DossierAnalyse? dossierAnalyse;
+  int? etat;
+  bool? acontroler;
 
+  DossierDto({this.dossierAnalyse, this.etat, this.acontroler});
+
+  DossierDto.fromJson(Map<String, dynamic> json) {
+    dossierAnalyse = json['dossierAnalyse'] != null
+        ? new DossierAnalyse.fromJson(json['dossierAnalyse'])
+        : null;
+    etat = json['etat'];
+    acontroler = json['acontroler'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.dossierAnalyse != null) {
+      data['dossierAnalyse'] = this.dossierAnalyse!.toJson();
+    }
+    data['etat'] = this.etat;
+    data['acontroler'] = this.acontroler;
+    return data;
+  }
+}
 class DossierAnalyse {
   String? nenreg;
   Patient? patient;
@@ -14,6 +35,7 @@ class DossierAnalyse {
   String? mois;
   String? jours;
   String? datePrelevement;
+  String? dateAdd;
   bool? urgent;
   int? statut;
   int? resultFlag;
@@ -40,6 +62,7 @@ class DossierAnalyse {
       this.mois,
       this.jours,
       this.datePrelevement,
+      this.dateAdd,
       this.urgent,
       this.statut,
       this.resultFlag,
@@ -68,6 +91,7 @@ class DossierAnalyse {
     mois = json['mois'];
     jours = json['jours'];
     datePrelevement = json['datePrelevement'];
+    dateAdd = json['dateAdd'];
     urgent = json['urgent'];
     statut = json['statut'];
     resultFlag = json['resultFlag'];
@@ -100,6 +124,7 @@ class DossierAnalyse {
     data['mois'] = this.mois;
     data['jours'] = this.jours;
     data['datePrelevement'] = this.datePrelevement;
+    data['dateAdd'] = this.dateAdd;
     data['urgent'] = this.urgent;
     data['statut'] = this.statut;
     data['resultFlag'] = this.resultFlag;
