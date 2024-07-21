@@ -1,5 +1,10 @@
+
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../dossier_analyse/dossier_bloc/dossieranalyse_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';

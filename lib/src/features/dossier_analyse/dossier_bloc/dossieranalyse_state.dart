@@ -9,10 +9,11 @@ class DossieranalyseState extends Equatable {
     this.recherche = "",
     // filtre checkbox
     this.filtreDetails = "",
-    this.dossiers = const [],
+     this.dossiers=const [] ,
     this.isLoading = false,
     this.isPopupLoading = false,
     this.isLoadingMore = false,
+    this.toatlDossiers=0,
   });
   final String sort;
   final String filtre;
@@ -23,11 +24,15 @@ class DossieranalyseState extends Equatable {
   final bool isPopupLoading;
   final bool isLoadingMore;
   final List<DossierDto> dossiers;
+  final int toatlDossiers;
+  //final List<DossierDto> dossiers;
   @override
-  List<Object> get props => [dossiers , sort,isLoading,isLoadingMore,recherche,filtre,valide,filtreDetails];
+  List<Object> get props => [toatlDossiers,dossiers , sort,isLoading,isLoadingMore,recherche,filtre,valide,filtreDetails];
 
   DossieranalyseState copyWith({
+   // List<DossierDto>? dossiers,
     List<DossierDto>? dossiers,
+    int? toatlDossiers,
     bool? isLoading,
     String? sort,
     String? recherche,
@@ -38,6 +43,7 @@ class DossieranalyseState extends Equatable {
   }) {
     return DossieranalyseState(
       dossiers: dossiers ?? this.dossiers,
+      toatlDossiers: toatlDossiers ?? this.toatlDossiers,
       isLoading: isLoading ?? this.isLoading,
       sort: sort ?? this.sort,
       recherche: recherche ?? this.recherche,
@@ -50,8 +56,9 @@ class DossieranalyseState extends Equatable {
 }
 
 class DossieranalyseInitial extends DossieranalyseState {
-  DossieranalyseInitial() : super(sort: ASC, isLoading: false, dossiers: []);
-}
+ // DossieranalyseInitial() : super(sort: ASC, isLoading: false);
+  DossieranalyseInitial();}
+
 /*
 
 class DossieranalyseInitial extends DossieranalyseState {

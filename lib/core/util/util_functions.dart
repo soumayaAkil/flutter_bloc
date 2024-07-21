@@ -40,13 +40,13 @@ class UtilFunctions {
     return " ${day.padLeft(2, '0')}/${month.padLeft(2, '0')}/${year}";
   }
 
-  static String filtreBackValide(String filtre, String filtreDetails,String valueRecherche) {
+  static String filtreBackValide(String filtre, String filtreDetails,
+      String valueRecherche) {
     String filtreBack = "date";
 
-    if (filtre == "recherche"||valueRecherche!="") {
+    if (filtre == "recherche" || valueRecherche != "") {
       log("www");
       if (filtreDetails == "") {
-
         filtreBack = "recherche";
       } else if (filtreDetails == "completetHNetnonreglé") {
         filtreBack = "filtreRNF";
@@ -61,8 +61,7 @@ class UtilFunctions {
     return filtreBack;
   }
 
-  static List<SearchCriteriaGroup> formatSearchCriteria(
-      String datedeb,
+  static List<SearchCriteriaGroup> formatSearchCriteria(String datedeb,
       String datefin,
       String filtre,
       String? valueRecherche,
@@ -94,8 +93,7 @@ class UtilFunctions {
     ListsearchCriteria.add(s3);
 
 // date valide recherche
-    if (filtre == "recherche"|| valueRecherche!="") {
-
+    if (filtre == "recherche" || valueRecherche != "") {
       final s4 = SearchCriteria(
         key: "patient.nom",
         operation: "like",
@@ -113,7 +111,6 @@ class UtilFunctions {
       final sg3 = SearchCriteriaGroup(
           orPredicate: false, searchCriterias: ListsearchCriteriaNom);
       ListsearchCriteriaGroup.add(sg3);
-
     }
     if (filtreDetails != "") {
       if (filtreDetails == "complet") {
@@ -309,24 +306,172 @@ class UtilFunctions {
   }
 
   static String rtfToPlain(String rtf) {
-    //  rtf="{\rtf1\ansi\deff0\deftab720{\fonttbl{\f0\fswiss MS Sans Serif;}{\f1\froman\fcharset2 Symbol;}{\f2\froman\fcharset178 Times New Roman;}{\f3\froman\fcharset178 Times New Roman;}{\f4\fswiss\fcharset178 Arial;}}";
-    rtf = rtf.replaceAll("(?s)\\\\(par|line)(?=(\\W|\\w+\\s|\\s|[{}]))", "¬");
-    rtf = rtf.replaceAll(
-        "\\{\\*?\\\\[^{}]+\\}|\\\\(?=\\\\)|\\\\(?=[{}])|(?<!\\\\)[{}]|(?<!\\\\)\\\\[A-Za-z]+\n?(?:-?\\d+)?[ ]?",
-        "");
-    String speceialChars =
-        "‰;Š;‹;Œ;;Ž;;;‘;’;“;”;•;–;—;~;™;š;›;œ;;ž;Ÿ;;¡;¢;£;¤;¥;¦;§;¨;©;ª;«;¬;(-);®;¯;°;±;²;³;´;µ;¶;·;¸;¹;º;»;¼;½;¾;¿;À;Á;Â;Ã;Ä;Å;Æ;Ç;È;É;Ê;Ë;Ì;Í;Î;Ï;Ð;Ñ;Ò;Ó;Ô;Õ;Ö;×;Ø;Ù;Ú;Û;Ü;Ý;Þ;ß;à;á;â;ã;ä;å;æ;ç;è;é;ê;ë;ì;í;î;ï;ð;ñ;ò;ó;ô;õ;ö;÷;ø;ù;ú;û;ü;ý;þ;ÿ";
-    String speceialCharsCode =
-        "\\\\'89;\\\\'8a;\\\\'8b;\\\\'8c;\\\\'8d;\\\\'8e;\\\\'8f;\\\\'90;\\\\'91;\\\\'92;\\\\'93;\\\\'94;\\\\'95;\\\\'96;\\\\'97;\\\\'98;\\\\'99;\\\\'9a;\\\\'9b;\\\\'9c;\\\\'9d;\\\\'9e;\\\\'9f;\\\\~;\\\\'a1;\\\\'a2;\\\\'a3;\\\\'a4;\\\\'a5;\\\\'a6;\\\\'a7;\\\\'a8;\\\\'a9;\\\\'aa;\\\\'ab;\\\\'ac;\\\\-;\\\\'ae;\\\\'af;\\\\'b0;\\\\'b1;\\\\'b2;\\\\'b3;\\\\'b4;\\\\'b5;\\\\'b6;\\\\'b7;\\\\'b8;\\\\'b9;\\\\'ba;\\\\'bb;\\\\'bc;\\\\'bd;\\\\'be;\\\\'bf;\\\\'c0;\\\\'c1;\\\\'c2;\\\\'c3;\\\\'c4;\\\\'c5;\\\\'c6;\\\\'c7;\\\\'c8;\\\\'c9;\\\\'ca;\\\\'cb;\\\\'cc;\\\\'cd;\\\\'ce;\\\\'cf;\\\\'d0;\\\\'d1;\\\\'d2;\\\\'d3;\\\\'d4;\\\\'d5;\\\\'d6;\\\\'d7;\\\\'d8;\\\\'d9;\\\\'da;\\\\'db;\\\\'dc;\\\\'dd;\\\\'de;\\\\'df;\\\\'e0;\\\\'e1;\\\\'e2;\\\\'e3;\\\\'e4;\\\\'e5;\\\\'e6;\\\\'e7;\\\\'e8;\\\\'e9;\\\\'ea;\\\\'eb;\\\\'ec;\\\\'ed;\\\\'ee;\\\\'ef;\\\\'f0;\\\\'f1;\\\\'f2;\\\\'f3;\\\\'f4;\\\\'f5;\\\\'f6;\\\\'f7;\\\\'f8;\\\\'f9;\\\\'fa;\\\\'fb;\\\\'fc;\\\\'fd;\\\\'fe;\\\\'ff";
-    List<String> chars = speceialChars.split(";");
-    List<String> charscodes = speceialCharsCode.split(";");
-    for (int i = 0; i < chars.length; i++) {
-      rtf = rtf.replaceAll(charscodes[i], chars[i]);
-    }
-    rtf = rtf.replaceAll("Times New Roman \\(Arabic\\);", "");
+    // Remove RTF headers and unnecessary tags
+    rtf = rtf.replaceAll(RegExp(r'\\pard'), '\n');
+    rtf = rtf.replaceAll(RegExp(r'\\par'), '\n');
+    rtf = rtf.replaceAll(RegExp(r'\\tab'), '\t');
+    rtf = rtf.replaceAll(RegExp(r'\\[a-z]+\d*'), '');
+    rtf = rtf.replaceAll(RegExp(r'\\\*\\[a-z]+'), '');
+    rtf = rtf.replaceAll(RegExp(r'[{}]'), '');
+    rtf = rtf.replaceAll(RegExp(r'\r\n|\r|\n'), ' ');
+    rtf = rtf.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // Handle special characters
+    Map<String, String> specialChars = {
+      r"\'89": "‰",
+      r"\'8a": "Š",
+      r"\'8b": "‹",
+      r"\'8c": "Œ",
+      r"\'8e": "Ž",
+      r"\'91": "‘",
+      r"\'92": "’",
+      r"\'93": "“",
+      r"\'94": "”",
+      r"\'95": "•",
+      r"\'96": "–",
+      r"\'97": "—",
+      r"\'98": "˜",
+      r"\'99": "™",
+      r"\'9a": "š",
+      r"\'9b": "›",
+      r"\'9c": "œ",
+      r"\'9e": "ž",
+      r"\'9f": "Ÿ",
+      r"\'a1": "¡",
+      r"\'a2": "¢",
+      r"\'a3": "£",
+      r"\'a4": "¤",
+      r"\'a5": "¥",
+      r"\'a6": "¦",
+      r"\'a7": "§",
+      r"\'a8": "¨",
+      r"\'a9": "©",
+      r"\'aa": "ª",
+      r"\'ab": "«",
+      r"\'ac": "¬",
+      r"\'ae": "®",
+      r"\'af": "¯",
+      r"\'b0": "°",
+      r"\'b1": "±",
+      r"\'b2": "²",
+      r"\'b3": "³",
+      r"\'b4": "´",
+      r"\'b5": "µ",
+      r"\'b6": "¶",
+      r"\'b7": "·",
+      r"\'b8": "¸",
+      r"\'b9": "¹",
+      r"\'ba": "º",
+      r"\'bb": "»",
+      r"\'bc": "¼",
+      r"\'bd": "½",
+      r"\'be": "¾",
+      r"\'bf": "¿",
+      r"\'c0": "À",
+      r"\'c1": "Á",
+      r"\'c2": "Â",
+      r"\'c3": "Ã",
+      r"\'c4": "Ä",
+      r"\'c5": "Å",
+      r"\'c6": "Æ",
+      r"\'c7": "Ç",
+      r"\'c8": "È",
+      r"\'c9": "É",
+      r"\'ca": "Ê",
+      r"\'cb": "Ë",
+      r"\'cc": "Ì",
+      r"\'cd": "Í",
+      r"\'ce": "Î",
+      r"\'cf": "Ï",
+      r"\'d0": "Ð",
+      r"\'d1": "Ñ",
+      r"\'d2": "Ò",
+      r"\'d3": "Ó",
+      r"\'d4": "Ô",
+      r"\'d5": "Õ",
+      r"\'d6": "Ö",
+      r"\'d7": "×",
+      r"\'d8": "Ø",
+      r"\'d9": "Ù",
+      r"\'da": "Ú",
+      r"\'db": "Û",
+      r"\'dc": "Ü",
+      r"\'dd": "Ý",
+      r"\'de": "Þ",
+      r"\'df": "ß",
+      r"\'e0": "à",
+      r"\'e1": "á",
+      r"\'e2": "â",
+      r"\'e3": "ã",
+      r"\'e4": "ä",
+      r"\'e5": "å",
+      r"\'e6": "æ",
+      r"\'e7": "ç",
+      r"\'e8": "è",
+      r"\'e9": "é",
+      r"\'ea": "ê",
+      r"\'eb": "ë",
+      r"\'ec": "ì",
+      r"\'ed": "í",
+      r"\'ee": "î",
+      r"\'ef": "ï",
+      r"\'f0": "ð",
+      r"\'f1": "ñ",
+      r"\'f2": "ò",
+      r"\'f3": "ó",
+      r"\'f4": "ô",
+      r"\'f5": "õ",
+      r"\'f6": "ö",
+      r"\'f7": "÷",
+      r"\'f8": "ø",
+      r"\'f9": "ù",
+      r"\'fa": "ú",
+      r"\'fb": "û",
+      r"\'fc": "ü",
+      r"\'fd": "ý",
+      r"\'fe": "þ",
+      r"\'ff": "ÿ"
+    };
+
+    specialChars.forEach((key, value) {
+      rtf = rtf.replaceAll(key, value);
+    });
+    rtf = rtf.replaceAll("Times New Roman;", "");
     rtf = rtf.replaceAll("Arial \\(Arabic\\);", "");
     rtf = rtf.replaceAll("¬", "\n");
-    rtf = rtf.trim();
+
     return rtf;
+  }
+
+  /*  static String encrypts(String str) {
+    if (str.equals("")) {
+      return str;
+    } else {
+      String ss = "";
+      for (int i = 0; i < str.length(); i++) {
+        String sub = str.substring(i, i + 1).charAt(0);
+        int asc = ((int) sub) - 10;
+        String fChar = (char) asc;
+        ss = ss + fChar;
+      }
+      return ss;
+    }
+  }
+  */
+  static String encrypt(String str) {
+    if (str.isEmpty) {
+      return str;
+    } else {
+      String ss = "";
+      for (int i = 0; i < str.length; i++) {
+        String sub = str.substring(i, i + 1);
+        int asc = sub.codeUnitAt(0) -
+            10; // Obtenir le code ASCII et soustraire 10
+        String fChar = String.fromCharCode(
+            asc); // Convertir le code ASCII en caractère
+        ss = ss + fChar;
+      }
+      return ss;
+    }
   }
 }

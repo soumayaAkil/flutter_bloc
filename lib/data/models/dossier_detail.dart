@@ -1,7 +1,30 @@
 import 'dart:ffi';
+class DetailCQI {
+  DossierAnalyseDetail? dossierDto;
+  int? cqi;
+
+  DetailCQI({this.dossierDto, this.cqi});
+
+  DetailCQI.fromJson(Map<String, dynamic> json) {
+    dossierDto = json['dossierDto'] != null
+        ? new DossierAnalyseDetail.fromJson(json['dossierDto'])
+        : null;
+    cqi = json['cqi'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.dossierDto != null) {
+      data['dossierDto'] = this.dossierDto!.toJson();
+    }
+    data['cqi'] = this.cqi;
+    return data;
+  }
+}
 
 class DossierAnalyseDetail {
-  String? num;
+    String? num;
+  String? guid;
   String? numDossier;
   //Analyse? analyse;
   String? abreviation;
@@ -35,9 +58,9 @@ class DossierAnalyseDetail {
   int? etat;
   int? dispOrder;
   String? groupOrder;
-  List<dynamic> anteriorite=[];
-
+  String? anteriorite;
   DossierAnalyseDetail({
+    this.guid,
       this.num,
       this.numDossier,
       this.abreviation,
@@ -73,9 +96,9 @@ class DossierAnalyseDetail {
       this.groupOrder,required this.anteriorite}); // String? anteriotite;
 //"ORDER BY d1.DatePrelevement Desc for xml path('')) as Anteriorite
 
-
   DossierAnalyseDetail.fromJson(Map<String, dynamic> json) {
 
+    guid = json['guid'];
     num = json['num'];
     numDossier = json['numDossier'];
     abreviation = json['abreviation'];
@@ -114,6 +137,7 @@ class DossierAnalyseDetail {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['guid'] = this.guid;
     data['num'] = this.num;
     data['numDossier'] = this.numDossier;
     data['abreviation'] = this.abreviation;

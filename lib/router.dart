@@ -4,10 +4,12 @@ import 'package:prolab_mobile/src/features/dossier_analyse/dossier_bloc/dossiera
 import 'package:prolab_mobile/src/features/dossier_detail/dossier_detail.dart';
 import 'package:prolab_mobile/src/features/dossier_detail/flitre_bloc/filtre_bloc.dart';
 import 'package:prolab_mobile/src/features/home/home_bloc/home_bloc.dart';
+import 'package:prolab_mobile/src/features/tableau_de_bord/bloc/stat_bloc.dart';
 import 'core/constants/strings/strings.dart';
 import 'data/repository/dossier_repository.dart';
 import 'data/web_services/dossier_web_services.dart';
 import 'src/features/home/home_page.dart';
+import 'src/features/reglement/bloc/reglement_bloc.dart';
 
 class AppRouter {
   late DossierAnalyseRepository dossiersRepository;
@@ -34,6 +36,10 @@ class AppRouter {
                 ),
                 BlocProvider(
                 create: (context) => FiltreBloc(),
+                ),  BlocProvider(
+                create: (context) => ReglementBloc(dossiersRepository),
+                ), BlocProvider(
+                create: (context) => StatBloc(dossiersRepository),
                 ),
 
                 BlocProvider(

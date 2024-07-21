@@ -9,6 +9,7 @@ import '../../../../core/config/config.dart';
 import '../../../../core/constants/strings/strings.dart';
 import '../../../../core/util/util_functions.dart';
 import '../../../../data/models/dossier_analyse_model.dart';
+import '../../../../data/models/dossier_pagination.dart';
 import '../../../../data/repository/dossier_repository.dart';
 import '../../../../data/models/dossier_analyse_model.dart';
 import '../../../../data/models/searchCriteria.dart';
@@ -37,35 +38,35 @@ class DossieranalyseBloc
       print(page);
       emit(state.copyWith(isLoading: true, isLoadingMore: true));
       try {
-        final result2;
+        DossierPagination?  result2= null;
         print(event.searchCriteriaGroup[0].searchCriterias?[0].value);
-        if(state.filtre=="valide" || state.valide==false ){
-          if (state.filtreDetails !="") {
+        if (state.filtre == "valide" || state.valide == false) {
+          if (state.filtreDetails != "") {
             result2 = await dossierAnalyseRepository.getValideFiltreDossier(
                 state.sort,
                 page,
-                event.dateDebFiltre,event.dateFinFiltre,event.searchCriteriaGroup,UtilFunctions.filtreBackValide(state.filtre,state.filtreDetails,state.recherche));
+                event.dateDebFiltre, event.dateFinFiltre,
+                event.searchCriteriaGroup, UtilFunctions.filtreBackValide(
+                state.filtre, state.filtreDetails, state.recherche));
           }
-          else{
+          else {
             result2 = await dossierAnalyseRepository.getValideDossier(
                 state.sort, page, event.dateDebFiltre, event.dateFinFiltre);
-
           }
-
         }
         else {
           result2 = await dossierAnalyseRepository.getDossier(
               state.sort, page, event.searchCriteriaGroup);
         }
-        print(result2!.length);
-        if (result2!.length < SIZEPAGINATION) {
+        print(result2!.content!.length );
+        if (result2!.content!.length < SIZEPAGINATION) {
           isLoadingMore = false;
           emit(state.copyWith(isLoadingMore: false));
           log("${state.isLoadingMore}hhhh");
           print("vide");
         }
-        emit(state.copyWith(
-            dossiers: [...state.dossiers, ...result2], isLoading: false));
+        emit(state.copyWith(toatlDossiers: result2!.totalElements,
+            dossiers: [...state.dossiers, ...?result2.content], isLoading: false));
       } catch (e) {
         emit(state.copyWith(isLoading: false, isLoadingMore: false));
         print("catch bloc $e");
@@ -77,37 +78,36 @@ class DossieranalyseBloc
       List<SearchCriteria> ListCriterias = [];
       if (event is SortDossiersEvent) {
         emit(state.copyWith(sort: event.asc));
-        emit(state.copyWith(isLoading: true,dossiers: []));
+        emit(state.copyWith(isLoading: true, dossiers:null ));
         try {
-          final resultSort;
+          DossierPagination? resultSort = null;
           page = 0;
           ListsearchCriteriaGroups = UtilFunctions.formatSearchCriteria(
-              event.startDate,event.endDate,
-              state.filtre ,
-              state.recherche,state.filtreDetails);
-          if(state.filtre=="valide" || state.valide==false ){
-            if (state.filtreDetails !="") {
-
-              resultSort = await dossierAnalyseRepository.getValideFiltreDossier(
+              event.startDate, event.endDate,
+              state.filtre,
+              state.recherche, state.filtreDetails);
+          if (state.filtre == "valide" || state.valide == false) {
+            if (state.filtreDetails != "") {
+              resultSort =
+              await dossierAnalyseRepository.getValideFiltreDossier(
                   state.sort,
                   page,
-                  event.startDate,event.endDate,ListsearchCriteriaGroups,UtilFunctions.filtreBackValide(state.filtre,state.filtreDetails,state.recherche));
+                  event.startDate, event.endDate, ListsearchCriteriaGroups,
+                  UtilFunctions.filtreBackValide(
+                      state.filtre, state.filtreDetails, state.recherche));
             }
-            else{
+            else {
               resultSort = await dossierAnalyseRepository.getValideDossier(
-                  state.sort, page ,event.startDate,event.endDate);
-
+                  state.sort, page, event.startDate, event.endDate);
             }
-
           }
           else {
             // date ou recherche
-            log('gggg');
-            log(state.recherche +"ttt");
+            log(state.recherche + "ttt");
 
-            log('gggg');
-            ListsearchCriteriaGroups=UtilFunctions.formatSearchCriteria(
-                event.startDate, event.endDate, state.filtre, state.recherche,state.filtreDetails);
+            ListsearchCriteriaGroups = UtilFunctions.formatSearchCriteria(
+                event.startDate, event.endDate, state.filtre, state.recherche,
+                state.filtreDetails);
 
             resultSort = await dossierAnalyseRepository.getDossier(
                 state.sort, page, ListsearchCriteriaGroups);
@@ -120,8 +120,8 @@ class DossieranalyseBloc
                state.sort, page, ListsearchCriteriaGroups);
           log("sortinng");
           */
-          log("${resultSort!.length}");
-          emit(state.copyWith(dossiers: resultSort, isLoading: false));
+          log("${resultSort!.content!.length}");
+          emit(state.copyWith(toatlDossiers: resultSort!.totalElements,dossiers: resultSort.content, isLoading: false));
         } catch (e) {
           emit(state.copyWith(isLoading: false));
           print("catch bloc sorting ");
@@ -129,6 +129,9 @@ class DossieranalyseBloc
         }
       }
     });
+    on<InitSortEvent>((event, emit) async {
+      if (event is InitSortEvent) {
+        emit(state.copyWith(sort: ASC));}});
   }
   Future<FutureOr<void>> _onCustomHomeEvent(
     LoadDossiersEvent event,
@@ -141,7 +144,7 @@ class DossieranalyseBloc
     try {
 
       page = 0;
-      final result;
+         DossierPagination?  result= null;
       if (event.filtre == "recherche") {
         emit(state.copyWith(recherche: event.recherche));
 
@@ -170,7 +173,7 @@ class DossieranalyseBloc
             event.searchCriteriaGroup);
       }
 
-      emit(state.copyWith(dossiers: result, isLoading: false));
+      emit(state.copyWith(dossiers: result!.content,toatlDossiers: result!.totalElements, isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false));
       print("catch bloc $e ");

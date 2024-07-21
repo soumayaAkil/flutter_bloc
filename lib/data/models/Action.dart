@@ -1,0 +1,7 @@
+enum ActionProlab {
+  MAIL_MEDECIN,
+  MAIL_PATIENT,
+  MAIL,
+  SMS_MEDECIN,
+  SMS_PATIENT
+}

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prolab_mobile/src/features/reglement/reglement_page.dart';
 import '../../../core/constants/my_colors.dart';
 import '../../../core/constants/strings/strings.dart';
 import '../../../core/util/util_functions.dart';
@@ -11,12 +12,17 @@ import '../../../data/repository/dossier_repository.dart';
 import '../../../data/web_services/dossier_web_services.dart';
 import '../dossier_analyse/dossier_bloc/dossieranalyse_bloc.dart';
 import '../dossier_analyse/dossier_screen.dart';
+import '../dossier_detail/antiboigramme_screen.dart';
+import '../dossier_detail/pieces_jointe.dart';
+import '../notification/notification_service.dart';
+import '../parametre/parametre_page.dart';
+import '../tableau_de_bord/tableau_bord_page.dart';
 import 'home_bloc/home_bloc.dart';
 
 List<BottomNavigationBarItem> bottomNavItems = const <BottomNavigationBarItem>[
   BottomNavigationBarItem(
-    icon: Icon(Icons.home),
-    label: 'Home',
+    icon: Icon(Icons.drive_file_move_rounded),
+    label: 'Dossier Analyse',
   ),
   BottomNavigationBarItem(
     icon: Icon(Icons.dashboard),
@@ -36,9 +42,9 @@ int currentIndex = 0;
 
 List<Widget> bottomNavScreen = <Widget>[
   const HomeScreen(),
-  const Text('Index 2: tab de bord'),
-  const Text('Index 3: reglement'),
-  const Text('Index 4: parametre'),
+  const TableauBordScreen(),
+  const ReglementScreen(),
+  const ParametreScreen(),
 ];
 
 @RoutePage()
@@ -116,18 +122,64 @@ class _HomePageState extends State<HomePage> {
       listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            backgroundColor: MyColors.colorPrimary,
-            title: const Text(
-              'Liste des Dossiers',
-              style: TextStyle(color: MyColors.grayClair),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.refresh),
-                color: MyColors.lightGrey,
+          appBar: state.tabIndex != 0
+              ? AppBar(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(15),
               ),
+
+            ),
+            backgroundColor: MyColors.colorPrimary,
+            title: Center(
+              child: getTitle(state.tabIndex),
+            ),
+            iconTheme: IconThemeData(
+              color: Colors.white, // Change the color here
+            ),
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.add_alert),
+                  onPressed: () {
+                    NotificationService()
+                        .showNotification(title: ' titre de notifiaction', body: 'contenu!');
+                    })
+            ],
+          )
+              :
+          AppBar(
+            backgroundColor: MyColors.colorPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(15),
+              ),
+
+            ),
+            title: Center(
+              child: Column(children: [
+
+              BlocBuilder<DossieranalyseBloc, DossieranalyseState>(
+        builder: (context, state) {
+          log("[home_page] state =>  $state");
+          return     Text(
+            'Dossier (s) :${ context.read<DossieranalyseBloc>().state.toatlDossiers }',
+            style: TextStyle(color: MyColors.white),
+          );
+        }),
+
+
+                ]),
+            ),
+            iconTheme: IconThemeData(
+              color: Colors.white, // Change the color here
+            ),
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.add_alert),
+                  onPressed: () {
+                    NotificationService()
+                        .showNotification(title: 'Sample title', body: 'It works!');
+                  })
             ],
             scrolledUnderElevation: 4.0,
           ),
@@ -148,82 +200,110 @@ class _HomePageState extends State<HomePage> {
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Date"),
-                              const SizedBox(width: 20),
-                              InkWell(
-                                onTap: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: dateDeb,
-                                    firstDate: DateTime(1950),
-                                    lastDate: DateTime(dateDFin.year,
-                                        dateDFin.month, dateDFin.day),
-                                  );
-                                  if (newDate == null) return;
-                                  setState(() => dateDeb = newDate);
-                                  final difference = dateDFin.difference(
-                                      dateDeb);
-                                  // 16591
-                                  if (difference.inDays > 7) {
-                                    print(
-                                        "intervaaaaallll grand ${difference
-                                            .inDays}");
+                              const Text("Date" ,style: const TextStyle(
+                             fontSize: 16),),
+                              const SizedBox(width: 10),
+                              Container(
+                                margin: EdgeInsets.only(right: 5),
+                                padding:EdgeInsets.only(left: 10.0, right: 10),
+                                decoration: BoxDecoration(
+                                
+                                border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.0,
+                                    ), // no shadow color set, defaults to black
+                                borderRadius:
+                                const BorderRadius.all(Radius.circular(5)),
+                             ),
+                                child: InkWell(
+                                  onTap: () async {
+                                    DateTime? newDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: dateDeb,
+                                      firstDate: DateTime(1950),
+                                      lastDate: DateTime(dateDFin.year,
+                                          dateDFin.month, dateDFin.day),
+                                    );
+                                    if (newDate == null) return;
+                                    setState(() => dateDeb = newDate);
+                                    final difference = dateDFin.difference(
+                                        dateDeb);
+                                    // 16591
+                                    if (difference.inDays > 7) {
+                                      print(
+                                          "intervaaaaallll grand ${difference
+                                              .inDays}");
 
-                                    showAlertDialog(context);
-                                  }
-                                  //APIDATE
-                                  String convertedDateDeb =
-                                  UtilFunctions.getFormatDate(dateDeb);
-                                  BlocProvider.of<HomeBloc>(context)
-                                      .add(
-                                      StartDateChange(date: convertedDateDeb));
-                                },
-                                child: Text(
-                                  "${dateDeb.day}/${dateDeb.month}/${dateDeb
-                                      .year}",
-                                  style: const TextStyle(
-                                      color: Colors.black, fontSize: 18),
+                                      showAlertDialog(context);
+                                    }
+                                    //APIDATE
+                                    String convertedDateDeb =
+                                    UtilFunctions.getFormatDate(dateDeb);
+                                    BlocProvider.of<HomeBloc>(context)
+                                        .add(
+                                        StartDateChange(date: convertedDateDeb));
+                                  },
+                                  child: Text(
+                                    "${dateDeb.day}/${dateDeb.month}/${dateDeb
+                                        .year}",
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 18),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 20),
-                              const Text("au"),
-                              const SizedBox(width: 20),
-                              InkWell(
-                                onTap: () async {
-                                  DateTime? newDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: dateDFin,
-                                    firstDate: DateTime(
-                                        dateDeb.year, dateDeb.month,
-                                        dateDeb.day),
-                                    lastDate: new DateTime(2200),
-                                  );
-                                  if (newDate == null) return;
-                                  setState(() => dateDFin = newDate);
-                                  final difference = dateDFin.difference(
-                                      dateDeb);
-                                  // 16591
-                                  if (difference.inDays > 7) {
-                                    print(
-                                        "intervaaaaallll grand ${difference
-                                            .inDays}");
+                             // const SizedBox(width: 20),
+                              const Text("au" ,style: const TextStyle(
+                                   fontSize: 16),),
 
-                                    showAlertDialog(context);
-                                  }
+                              Container(
+                                margin: EdgeInsets.only(left: 5),
+                                padding:EdgeInsets.only(left: 10.0, right: 10),
+                                decoration: BoxDecoration(
 
-                                  //APIDATE
-                                  String convertedDateFin =
-                                  UtilFunctions.getFormatDate(dateDFin);
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.0,
+                                  ), // no shadow color set, defaults to black
+                                  borderRadius:
+                                  const BorderRadius.all(Radius.circular(5)),
+                                ),
+                                child: InkWell(
+                                  onTap: () async {
+                                    DateTime? newDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: dateDFin,
+                                      firstDate: DateTime(
+                                          dateDeb.year, dateDeb.month,
+                                          dateDeb.day),
+                                      lastDate: new DateTime(2200),
+                                    );
+                                    if (newDate == null) return;
+                                    setState(() => dateDFin = newDate);
+                                    final difference = dateDFin.difference(
+                                        dateDeb);
+                                    // 16591
+                                    if (difference.inDays > 7) {
+                                      print(
+                                          "intervaaaaallll grand ${difference
+                                              .inDays}");
 
-                                  BlocProvider.of<HomeBloc>(context)
-                                      .add(
-                                      EndDateChange(date: convertedDateFin));
-                                },
-                                child: Text(
-                                  "${dateDFin.day}/${dateDFin.month}/${dateDFin
-                                      .year}",
-                                  style: const TextStyle(
-                                      color: Colors.black, fontSize: 18),
+                                      showAlertDialog(context);
+                                    }
+
+                                    //APIDATE
+                                    String convertedDateFin =
+                                    UtilFunctions.getFormatDate(dateDFin);
+
+                                    BlocProvider.of<HomeBloc>(context)
+                                        .add(
+                                        EndDateChange(date: convertedDateFin));
+                                  },
+                                  child: Text(
+                                    "${dateDFin.day}/${dateDFin.month}/${dateDFin
+                                        .year}",
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 18),
+                                  ),
                                 ),
                               ),
                             ]),
@@ -381,6 +461,24 @@ class _HomePageState extends State<HomePage> {
 
   }
 
+   getTitle(int tabIndex) {
+    if (tabIndex == 1) {
+      return Text(
+        'Tableau de bord ',
+        style: TextStyle(color: MyColors.white),
+      );
+    } else if (tabIndex == 2) {
+      return Text(
+        'Liste des règlements',
+        style: TextStyle(color: MyColors.white),
+      );
+    } else if (tabIndex == 3) {
+      return Text(
+        ' Paramétres',
+        style: TextStyle(color: MyColors.white),
+      );
+    }
+  }
 
 }
 

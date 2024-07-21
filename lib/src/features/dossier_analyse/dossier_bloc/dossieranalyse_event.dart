@@ -53,3 +53,11 @@ class SortDossiersEvent implements DossieranalyseEvent {
   // TODO: implement props
   List<Object> get props => throw UnimplementedError();
 }
+class InitSortEvent implements DossieranalyseEvent {
+
+  const InitSortEvent();
+
+  @override
+  // TODO: implement props
+  List<Object> get props => throw UnimplementedError();
+}

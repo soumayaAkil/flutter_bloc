@@ -1,9 +1,19 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:prolab_mobile/data/repository/dossier_repository.dart';
 import 'dart:convert';
 
 import '../../../core/constants/my_colors.dart';
+import '../../../data/models/login.dart';
+import '../../../data/web_services/dossier_web_services.dart';
 import '../../../main.dart';
 import '../../../router.dart';
+import '../parametre/general_page.dart';
+import 'login_bloc/login_bloc.dart';
+import 'login_user.dart';
 
 
 
@@ -16,15 +26,43 @@ class LoginPage extends StatefulWidget {
 }
 
 class _loginPageState extends State<LoginPage> {
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String _token = '';
   @override
-  void initState() {
-    _obscureText = true;
-    _emailFocus = FocusNode();
-    _pwFocus = FocusNode();
+  void initState()  {
 
+    _loadToken();
+
+    Future.delayed(Duration(seconds: 2), ()  {
+
+      if ((_token.isEmpty))
+        {
+          log("[token if] $_token");
+        Navigator.of(context).push(_createRoute(GeneralPage()));
+    }else{
+        if(_token.isEmpty)
+          {
+            log("#[token] null ");
+          }
+      log("[token] ${_token.toString()}");
+      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) =>ProlabApp(appRouter: AppRouter())),(Route<dynamic> route) => false,);
+
+      }
+    });
 
     super.initState();
   }
+
+
+
+
+  Future<void> _loadToken() async {
+    String token = await _secureStorage.read(key: 'token') ?? '';
+    setState(() {
+      _token = token;
+    });
+  }
+  late DossierAnalyseRepository  dossiersRepository = DossierAnalyseRepository(DossierWebService());
 
   bool visible = false;
   late FocusNode _emailFocus, _pwFocus;
@@ -35,14 +73,14 @@ class _loginPageState extends State<LoginPage> {
   var mytoken;
 
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
+  final nomController = TextEditingController();
   final passwordController = TextEditingController();
 
   Future userLogin() async {
     setState(() {
       visible = true;
     });
-    String email = emailController.text.trimRight().trimLeft();
+    String nom = nomController.text.trimRight().trimLeft();
     String password = passwordController.text.trimRight().trimLeft();
     var formdata = _formkey.currentState;
 /*
@@ -52,7 +90,6 @@ class _loginPageState extends State<LoginPage> {
       print(_vals![0]);
     }
     */
-    var data = {'email': email, 'password': password, 'token': mytoken};
 
 
 
@@ -127,14 +164,8 @@ class _loginPageState extends State<LoginPage> {
             margin: EdgeInsets.only(top: 60),
             child: TextButton(
 
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) =>
-                  ProlabApp(appRouter: AppRouter())), (Route<dynamic> route) => false,
-                  );
-                },
 
+                onPressed: () {  },
                 child: Text(
                   'Se connecter',
                   style: TextStyle(
@@ -149,5 +180,22 @@ class _loginPageState extends State<LoginPage> {
       ),
     );
   }
+  Route _createRoute(dynamic Page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(-1.0, 0.0); // Change to left-to-right animation
+        const end = Offset.zero;
+        const curve = Curves.ease;
 
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    );
+  }
 }

@@ -30,6 +30,7 @@ class DossierPagination {
         this.empty});
 
   DossierPagination.fromJson(Map<String, dynamic> json) {
+
     if (json['content'] != null) {
       content = <DossierDto>[];
       json['content'].forEach((v) {

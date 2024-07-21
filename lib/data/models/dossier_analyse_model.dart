@@ -5,15 +5,18 @@ class DossierDto {
   DossierAnalyse? dossierAnalyse;
   int? etat;
   bool? acontroler;
+  int? ATB;
+  double ignoreSolde=0;
 
-  DossierDto({this.dossierAnalyse, this.etat, this.acontroler});
-
+  DossierDto({this.dossierAnalyse, this.etat, this.acontroler, this.ATB, required this.ignoreSolde});
   DossierDto.fromJson(Map<String, dynamic> json) {
     dossierAnalyse = json['dossierAnalyse'] != null
         ? new DossierAnalyse.fromJson(json['dossierAnalyse'])
         : null;
     etat = json['etat'];
     acontroler = json['acontroler'];
+    ATB = json['ATB'];
+    ignoreSolde = json['ignoreSolde'];
   }
 
   Map<String, dynamic> toJson() {
@@ -23,6 +26,8 @@ class DossierDto {
     }
     data['etat'] = this.etat;
     data['acontroler'] = this.acontroler;
+    data['ATB'] = this.ATB;
+    data['ignoreSolde'] = this.ignoreSolde;
     return data;
   }
 }

@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late List<DossierDto> allDossierAnalyse;
+  late int totalDossiers;
   DossierAnalyseRepository dossiersRepository =
       DossierAnalyseRepository(DossierWebService());
   bool isSwitched = true;
@@ -49,8 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final startDate = context.read<HomeBloc>().state.startDate;
     final endDate = context.read<HomeBloc>().state.endDate;
     List<SearchCriteriaGroup> ListsearchCriteriaGroup = [];
+    context
+        .read<DossieranalyseBloc>().add(InitSortEvent());
     ListsearchCriteriaGroup =
-        UtilFunctions.formatSearchCriteria(startDate, endDate, "date", BlocProvider.of<DossieranalyseBloc>(context).state.recherche,BlocProvider.of<DossieranalyseBloc>(context).state.filtreDetails);
+        UtilFunctions.formatSearchCriteria(startDate, endDate, "date", "","");
+            //BlocProvider.of<DossieranalyseBloc>(context).state.recherche,
+            //BlocProvider.of<DossieranalyseBloc>(context).state.filtreDetails);
     scrollController.addListener(() {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
@@ -91,7 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     context
         .read<DossieranalyseBloc>()
-        .add(LoadDossiersEvent("", "", ListsearchCriteriaGroup,BlocProvider.of<DossieranalyseBloc>(context).state.recherche,BlocProvider.of<DossieranalyseBloc>(context).state.valide,  "date",BlocProvider.of<DossieranalyseBloc>(context).state.filtreDetails));
+        .add(LoadDossiersEvent("", "", ListsearchCriteriaGroup,"",true,
+        //BlocProvider.of<DossieranalyseBloc>(context).state.recherche,
+       // BlocProvider.of<DossieranalyseBloc>(context).state.valide,
+        "date",""));
+        //BlocProvider.of<DossieranalyseBloc>(context).state.filtreDetails));
     //.add(event)
     // .loadData(startDate, endDate, STATUT, ASC);
   }
@@ -107,36 +116,55 @@ class _HomeScreenState extends State<HomeScreen> {
         }  */
 
         allDossierAnalyse = (state).dossiers;
+        totalDossiers = (state).toatlDossiers;
+
         log("length");
         log(allDossierAnalyse.length.toString());
-        return Expanded(
-          child: ListView.builder(
-            controller: scrollController,
-            shrinkWrap: true,
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.zero,
-            //itemCount: allDossierAnalyse.length,
-            itemCount: allDossierAnalyse.length,
-            itemBuilder: (context, index) {
-              if (index < allDossierAnalyse.length) {
-                log("resultFlag");
-                log( allDossierAnalyse[index].dossierAnalyse!.resultFlag.toString());
-                return DossierItem(
-                    allDossierAnalyse[index],
-                    UtilFunctions.getColor(
-                        allDossierAnalyse[index].dossierAnalyse!.resultFlag!,
-                        allDossierAnalyse[index].dossierAnalyse!.statut!));
-              } else {
-                log("${state.isLoadingMore} no more data ");
-                return Center(
-                    child: state.isLoadingMore
-                        ? const CircularProgressIndicator()
-                        : const Text("no more data to load "));
-              }
-            },
-          ),
-        );
-      },
+        if (state.isLoading==true && allDossierAnalyse.length==0)
+          {
+            return Center(child: const CircularProgressIndicator());
+          }
+        else if( allDossierAnalyse.length==0 ){
+          log("${state.isLoadingMore} no more data ");
+          return Center(
+            child: Container(
+                alignment:AlignmentDirectional.center ,
+                height: MediaQuery.of(context).size.width,
+                child:const Text("Liste vide")),
+          );
+
+
+        }
+        else {
+          return Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.zero,
+              //itemCount: allDossierAnalyse.length,
+              itemCount: allDossierAnalyse.length,
+              itemBuilder: (context, index) {
+                if (index < allDossierAnalyse.length) {
+                  log("resultFlag");
+                  log(allDossierAnalyse[index].dossierAnalyse!.resultFlag
+                      .toString());
+                  return DossierItem(
+                      allDossierAnalyse[index],
+                      UtilFunctions.getColor(
+                          allDossierAnalyse[index].dossierAnalyse!.resultFlag!,
+                          allDossierAnalyse[index].dossierAnalyse!.statut!));
+                } else {
+                  log("${state.isLoadingMore} no more data ");
+                  return Center(
+                      child: state.isLoadingMore
+                          ? const CircularProgressIndicator()
+                          : const Text("no more data to load "));
+                }
+              },
+            ),
+          );
+        }},
     );
   }
 
@@ -195,10 +223,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Container(
-                          width: (MediaQuery.of(context).size.width * .54),
+                        margin:EdgeInsets.only(right: 10) ,
+                          width: (MediaQuery.of(context).size.width * .62),
                           child: _searchIsOpen
                               ? TextField(
-                                  controller: mycontroller,
+                            //keyboardType: TextInputType.text,
+                            //keyboardType: TextInputType.streetAddress ,
+                            textInputAction: TextInputAction.go,
+                            controller: mycontroller,
                                   textAlignVertical: TextAlignVertical.bottom,
                                   enabled: _searchIsOpen,
                                   decoration: InputDecoration(
@@ -241,7 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         );
                                         setState(() {
                                           isSwitched=true;
-                                          toggleSwitch;
+
+
+                                          toggleSwitch(isSwitched);
                                         });
                                       },
                                     ),
@@ -317,10 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     });
                                   },
                                 )),
-                      InkWell(
-                        onTap: () {},
-                        child: Icon(Icons.search),
-                      )
+
                       /*  AnimatedContainer(
                         duration: const Duration(milliseconds: 500),
                         width: _searchIsOpen
@@ -475,8 +506,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 */
                   SizedBox(
-                    width: 60,
-                    height: 40,
+
                     child: FittedBox(
                       fit: BoxFit.fill,
                       child: Switch(
@@ -487,10 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child:
+
                     Container(
                       width: 50,
                        margin: EdgeInsets.symmetric(horizontal: 2,),
@@ -544,13 +571,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               showAlertDialog(context);
                             }),
                   ),
-                  ),
+
                 ]))),
         OfflineBuilder(
           connectivityBuilder: (
             BuildContext context,
             ConnectivityResult connectivity,
-            Widget child,
+            Widget child
           ) {
             final bool connected = connectivity != ConnectivityResult.none;
 
@@ -572,7 +599,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       //animation style
                       curve: Curves.linear,
                     );
-                  },
+                  } ,
                   child: buildBlocWidget());
 
               /*
@@ -629,9 +656,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void toggleSwitch(bool value) {
     log(mycontroller.text.toString());
-    if (isSwitched == true) {
+
+    if (value == false) {
       setState(() {
-        isSwitched = false;
+        isSwitched = value;
         textValue = 'Validé';
 
         List<SearchCriteriaGroup> ListsearchCriteriaGroup = [];
@@ -665,7 +693,7 @@ log("5555 ${BlocProvider.of<DossieranalyseBloc>(context).state.recherche}");
       print('Switch Button is OFF');
       print(BlocProvider.of<HomeBloc>(context).state.startDate);
       setState(() {
-        isSwitched = true;
+        isSwitched = value;
         textValue = 'Non Validé';
         List<SearchCriteriaGroup> ListsearchCriteriaGroup = [];
 
@@ -700,6 +728,7 @@ log("5555 ${BlocProvider.of<DossieranalyseBloc>(context).state.recherche}");
           return BlocProvider.value(
             value: BlocProvider.of<DossieranalyseBloc>(context),
             child: BlocBuilder<DossieranalyseBloc, DossieranalyseState>(
+              buildWhen: (p,s){return p.sort!=s.sort;},
               builder: (contextb, state) {
                 /* final state = context
                           .watch<DossieranalyseBloc>()
@@ -882,7 +911,7 @@ log("5555 ${BlocProvider.of<DossieranalyseBloc>(context).state.recherche}");
                                 iconFiltre='assets/images/filtreD.png';
                               }),
 
-                              Navigator.pop(context)},
+                              Navigator.pop(context2)},
                             child: const Text('Annuler'),
                           ),
                           TextButton(
@@ -995,7 +1024,7 @@ log("5555 ${BlocProvider.of<DossieranalyseBloc>(context).state.recherche}");
                     iconFiltre='assets/images/filtre.png';
                               }),
 
-                              Navigator.pop(context),
+                              Navigator.pop(context2),
 
                             },
                             child: const Text('Appliquer'),

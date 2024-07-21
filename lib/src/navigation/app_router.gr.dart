@@ -18,7 +18,7 @@ abstract class _$AppRouter extends RootStackRouter {
     DossierDetailRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: DossierDetail(DossierDto()),
+        child: DossierDetail( DossierDto(ignoreSolde: 0)),
       );
     },
     HomeRoute.name: (routeData) {

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,6 +10,7 @@ import '../../../data/web_services/dossier_web_services.dart';
 import '../../navigation/app_router.dart';
 import '../dossier_detail/detail_bloc/dossier_detail_bloc.dart';
 import '../dossier_detail/dossier_detail.dart';
+import '../dossier_detail/email_bloc/email_bloc.dart';
 
 class DossierItem extends StatelessWidget {
   final DossierDto dossier;
@@ -17,6 +20,9 @@ class DossierItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var iconSex;
+    log("7575757575");
+    log(DateTime.parse(dossier.dossierAnalyse!.datePrelevement!.substring(0,22)).toString());
+    DateTime datecurrent=DateTime.parse(dossier.dossierAnalyse!.datePrelevement!.substring(0,22));
     if ((this.dossier.dossierAnalyse!.patient?.titre?.toUpperCase().trim() == "MR")) {
       iconSex = "patient_male.png";
     } else if ((this.dossier.dossierAnalyse!.patient?.titre?.toUpperCase().trim() ==
@@ -30,15 +36,25 @@ class DossierItem extends StatelessWidget {
     }
     return GestureDetector(
       onTap: (){
+        log("1111${dossier.dossierAnalyse!.patient!.nom} ");
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) =>
-
+              MultiBlocProvider(
+                  providers: [
+                  BlocProvider(
+                  create: (context) => EmailBloc(),
+        ),
       BlocProvider<DossierDetailBloc>(
         create: (BuildContext context)  =>
-        DossierDetailBloc(DossierAnalyseRepository(DossierWebService()))..add( LoadDetailEvent(this.dossier.dossierAnalyse!.nenreg!!)),
-        child:  DossierDetail(this.dossier),
-      ),),
+        DossierDetailBloc(DossierAnalyseRepository(DossierWebService()))..add( LoadDetailEvent(this.dossier)),
+        // dossierAnalyse!.nenreg!!
+      ),
+        ],
+        child:  DossierDetail(this.dossier ),
+      ),
+
+        ),
         );
         },
       child: Container(
@@ -87,7 +103,7 @@ class DossierItem extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text.rich(
-                            maxLines: 1,
+                            //maxLines: 1,
                             TextSpan(children: [
                               TextSpan(
                                   text:
@@ -136,7 +152,7 @@ class DossierItem extends StatelessWidget {
                     child: Row(children: [
                       Expanded(
                         child: Text(
-                          "${dossier.dossierAnalyse!.nenreg}       ${DateTime.parse(dossier.dossierAnalyse!.datePrelevement!).year}-${DateTime.parse(dossier.dossierAnalyse!.datePrelevement!).month}-${DateTime.parse(dossier.dossierAnalyse!.datePrelevement!).day}    ${DateTime.parse(dossier.dossierAnalyse!.datePrelevement!).hour}:${DateTime.parse(dossier.dossierAnalyse!.datePrelevement!).minute}",
+                          "${dossier.dossierAnalyse!.nenreg}       ${datecurrent .year}-${datecurrent.month}-${datecurrent.day}    ${datecurrent.hour}:${datecurrent.minute}",
                           maxLines: 1,
                           style: const TextStyle(fontSize: 12),
                         ),
@@ -151,7 +167,7 @@ class DossierItem extends StatelessWidget {
                             width: 20.0,
                           ),
                         ),
-                      if (dossier.dossierAnalyse!.solde! > 0)
+                      if (dossier.dossierAnalyse!.solde! > dossier.ignoreSolde)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Image.asset(
@@ -160,7 +176,7 @@ class DossierItem extends StatelessWidget {
                             width: 20.0,
                           ),
                         ),
-                      if (dossier.dossierAnalyse!.solde! <= 0)
+                      if (dossier.dossierAnalyse!.solde! <= dossier.ignoreSolde)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Image.asset(
